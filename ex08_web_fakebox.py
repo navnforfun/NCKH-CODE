@@ -1,5 +1,5 @@
 #  delay time reset box
-
+import requests
 from flask import Flask, render_template, Response,request
 import cv2
 from ultralytics import YOLO
@@ -15,6 +15,7 @@ box_annotator = sv.BoxAnnotator(thickness=1, text_thickness=1, text_scale=0.5)
 #  send notice to dweet
 def alertNotice(state):
     dweepy.dweet_for("dnu_cntt1504_nhom2_notice",{"state":"Fire","duration":"3000","warning":"yes"})
+    requests.get("http://localhost:5257/Emails/MySendMailAPI?notice=fire")
 
 
 def gen_frames(conf,lever,src):  # generate frame by frame from camera
