@@ -10,27 +10,19 @@ import threading
 
 model = YOLO('models/model_v11.pt')
 app = Flask(__name__)
-
-# cap = cv2.VideoCapture(0)
-# cap = cv2.VideoCapture("http://192.168.1.228:81/stream")
-# cap = cv2.VideoCapture("http://192.168.1.241:4747/video")
-# model = YOLO("best.pt")
 box_annotator = sv.BoxAnnotator(thickness=1, text_thickness=1, text_scale=0.5)
 
-
+#  send notice to dweet
 def alertNotice(state):
     dweepy.dweet_for("dnu_cntt1504_nhom2_notice",{"state":"Fire","duration":"3000","warning":"yes"})
 
 
-
-
 def gen_frames(conf,lever,src):  # generate frame by frame from camera
-    # cap = cv2.VideoCapture("http://192.168.0.106:4747/video")
     # cap.release()
     # cap = cv2.VideoCapture("http://192.168.1.241:4747/video")
     # cap = cv2.VideoCapture("http://14.161.31.172:81/asp/video.cgi")
     cap = cv2.VideoCapture(src)
-
+    # skip frame tránh lag
     start_time = time.time()
     time_now = start_time
     my_time = 0
@@ -43,27 +35,25 @@ def gen_frames(conf,lever,src):  # generate frame by frame from camera
         time_now = time.time() - start_time
         # print(time_now)
         isDraw = True
+        # skip frame tránh lag
         if((time_now - my_time ) <2):
             # print("bo qua. time skip: " , (time_now - my_time ))
             pass
         else:
             isDraw =False
-            # print("===detect===")
             my_time = time_now
             if not ret:
                 break
             result = model(frame,agnostic_nms=True,verbose=False)[0]
             detections = sv.Detections.from_yolov8(result)
+            # check confident
             detections = [detection for detection in sv.Detections.from_yolov8(result) if detection[1] > (conf/100)]
             if(detections != None):
-                # print("check box")
-                # print(detections)
+                # Optional: Calculate area
                 for detection in detections:
                     bounding_box_coords = detection[0]  # Extract coordinates
                     width = bounding_box_coords[2] - bounding_box_coords[0]  # Calculate width
                     height = bounding_box_coords[3] - bounding_box_coords[1]  # Calculate height
-
-                    # Optional: Calculate area
                     area = width * height
                     check = (area/76000*100)>lever
                     if(check):
@@ -80,16 +70,12 @@ def gen_frames(conf,lever,src):  # generate frame by frame from camera
                 in detections
             ]
             if(isDraw):
-                # print("Ve 1")
                 frame = box_annotator.annotate(scene = frame,detections=detections,labels=labels)
             else:
                 detections = None
-        # print("abc")
         
    
         if(detections != None):
-            # print("Ve 2")
-            # pass
             frame = box_annotator.annotate(scene = frame,detections=detections,labels=labels)
         
         try:
@@ -100,7 +86,6 @@ def gen_frames(conf,lever,src):  # generate frame by frame from camera
             pass
         yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
-
 
 @app.route('/video_feed')
 def video_feed():
