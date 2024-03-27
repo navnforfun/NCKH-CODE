@@ -55,6 +55,7 @@ def gen_frames(conf,lever,src):  # generate frame by frame from camera
                     width = bounding_box_coords[2] - bounding_box_coords[0]  # Calculate width
                     height = bounding_box_coords[3] - bounding_box_coords[1]  # Calculate height
                     area = width * height
+                    # tính độ lớn cơ bản của lửa so với 1/4 màn hình 
                     check = (area/76000*100)>lever
                     if(check):
                         print(f"=== chay to: {area/76000*100} vs {lever} ===")
@@ -86,7 +87,6 @@ def gen_frames(conf,lever,src):  # generate frame by frame from camera
             pass
         yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')  # concat frame one by one and show result
-
 @app.route('/video_feed')
 def video_feed():
     print(request.query_string)
