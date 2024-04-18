@@ -16,6 +16,7 @@ box_annotator = sv.BoxAnnotator(thickness=1, text_thickness=1, text_scale=0.5)
 def alertNotice(state):
     dweepy.dweet_for("dnu_cntt1504_nhom2_notice",{"state":"Fire","duration":"3000","warning":"yes"})
     requests.get("http://localhost:5257/Emails/MySendMailAPI?notice=fire")
+    requests.get("http://localhost:5257/DashBoard/AddLogAPI?status=fire")
 
 
 def gen_frames(conf,lever,src):  # generate frame by frame from camera
@@ -121,3 +122,4 @@ def index():
 if __name__ == '__main__':
     # app.run(debug=True)
     app.run()
+
